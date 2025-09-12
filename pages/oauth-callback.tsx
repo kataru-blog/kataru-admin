@@ -2,7 +2,7 @@ import { useEffect, useState, type FC } from 'react'
 import { useRouter } from 'shared/lib/router'
 
 export const OAuthCallback: FC = () => {
-    const apiURL = process.env.NODE_ENV !== 'production' ? 'https://kataru.dev/api' : 'http://localhost:3000/api'
+    const apiURL = process.env.NODE_ENV === 'production' ? 'https://kataru.dev/api' : 'http://localhost:3000/api'
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()

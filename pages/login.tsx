@@ -2,8 +2,8 @@ import { Github } from 'lucide-react'
 import { useState, type FC } from 'react'
 
 export const Login: FC = () => {
-    const apiURL = process.env.NODE_ENV !== 'production' ? 'https://kataru.dev/api' : 'http://localhost:3000/api'
-    const origin = process.env.NODE_ENV !== 'production' ? 'https://admin.kataru.dev' : 'http://localhost:10101'
+    const apiURL = process.env.NODE_ENV === 'production' ? 'https://kataru.dev/api' : 'http://localhost:3000/api'
+    const origin = process.env.NODE_ENV === 'production' ? 'https://admin.kataru.dev' : 'http://localhost:10101'
     const [isLoading, setIsLoading] = useState(false)
 
     const handleSocialLogin = async (provider: string) => {
