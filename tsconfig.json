@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "allowJs": true,
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "target": "ES2022",
+        "esModuleInterop": true,
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
+        "noEmit": true,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./*"],
+            "app": ["./app"],
+            "app/*": ["./app/*"],
+            "entities": ["./entities"],
+            "entities/*": ["./entities/*"],
+            "features": ["./features"],
+            "features/*": ["./features/*"],
+            "shared": ["./shared"],
+            "shared/*": ["./shared/*"],
+            "widgets": ["./widgets"],
+            "widgets/*": ["./widgets/*"],
+            "pages": ["./pages"],
+            "pages/*": ["./pages/*"]
+        }
+    },
+    "include": ["**/*.ts", "**/*.tsx"],
+    "exclude": ["dist", "node_modules"]
+}
