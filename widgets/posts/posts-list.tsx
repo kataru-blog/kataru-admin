@@ -1,7 +1,18 @@
-import { useGetAdminPosts } from 'entities/posts'
+import { useGetAdminPosts, useDeleteAdminPost } from 'entities/posts'
 import { ArticleCard, Paginator } from 'features'
-import { Fragment } from 'react/jsx-runtime'
+import { Fragment, useState } from 'react'
 import { Skeleton } from 'shared/ui/skeleton'
+import { toast } from 'sonner'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from 'shared/ui/alert-dialog'
 
 interface PostsListProps {
     searchKeyword: string
@@ -19,9 +30,24 @@ export const PostsList = ({ searchKeyword, sortBy, sortOrder, currentPage, onPag
         page: currentPage,
         limit: 10,
     })
+    const deletePost = useDeleteAdminPost()
+    const [deletePostId, setDeletePostId] = useState<string | null>(null)
 
     const posts = data?.posts || []
     const totalPages = data?.totalPages || 1
+
+    const handleDelete = async () => {
+        if (!deletePostId) return
+        
+        try {
+            await deletePost.mutateAsync(deletePostId)
+            toast.success('포스트가 삭제되었습니다')
+            setDeletePostId(null)
+        } catch (error) {
+            toast.error('포스트 삭제에 실패했습니다')
+            console.error('Failed to delete post:', error)
+        }
+    }
 
     if (isLoading) {
         return (
@@ -45,11 +71,32 @@ export const PostsList = ({ searchKeyword, sortBy, sortOrder, currentPage, onPag
         <Fragment>
             <div className='flex flex-col gap-3.5'>
                 {posts.map((post) => (
-                    <ArticleCard key={post.id} {...post} />
+                    <ArticleCard 
+                        key={post.id} 
+                        {...post} 
+                        onDelete={(id) => setDeletePostId(id)}
+                    />
                 ))}
             </div>
 
             <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+            
+            <AlertDialog open={!!deletePostId} onOpenChange={(open) => !open && setDeletePostId(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>정말 삭제하시겠습니까?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            이 작업은 되돌릴 수 없습니다. 포스트가 영구적으로 삭제됩니다.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>취소</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className='bg-destructive text-destructive-foreground'>
+                            삭제
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </Fragment>
     )
 }

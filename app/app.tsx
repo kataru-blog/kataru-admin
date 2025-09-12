@@ -1,5 +1,6 @@
 import { Layout } from '@/features'
 import { PostEditor } from '@/pages/post-editor'
+import { PostDetail } from '@/pages/post-detail'
 import { QueryProvider } from '@/shared/lib/query'
 import { Blog, Dashboard, Posts, Comments, Login, OAuthCallback } from 'pages'
 import { StrictMode } from 'react'
@@ -22,7 +23,8 @@ createRoot(rootElement).render(
                     <Route path='/' element={Dashboard} />
                     <Route path='/posts' element={Posts} />
                     <Route path='/posts/create' element={PostEditor} />
-                    <Route path='/posts/edit/:id' element={PostEditor} />
+                    <Route path='/posts/:id' element={PostDetail} />
+                    <Route path='/posts/:id/edit' element={PostEditor} />
                     <Route path='/comments' element={Comments} />
                     <Route path='/blog' element={Blog} />
                 </Layout>

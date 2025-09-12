@@ -1,19 +1,39 @@
 import type { Post, User } from 'entities/types'
-import { Eye, Heart } from 'lucide-react'
+import { Eye, Heart, Edit, Trash2 } from 'lucide-react'
 import type { FC } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from 'shared/ui/avatar'
 import { Card } from 'shared/ui/card'
+import { Button } from 'shared/ui/button'
+import { useRouter } from 'shared/lib/router'
 
 interface ArticleCardProps extends Pick<Post, 'id' | 'thumbnailUrl' | 'title' | 'summary' | 'createdAt'> {
     user?: Partial<User>
     viewCount: number
     likeCount: number
+    onDelete?: (id: string) => void
 }
 
-export const ArticleCard: FC<ArticleCardProps> = ({ id, thumbnailUrl, title, summary, createdAt, user, viewCount, likeCount }) => {
+export const ArticleCard: FC<ArticleCardProps> = ({ id, thumbnailUrl, title, summary, createdAt, user, viewCount, likeCount, onDelete }) => {
+    const router = useRouter()
+    
+    const handleCardClick = () => {
+        router.navigate(`/posts/${id}`)
+    }
+    
+    const handleEdit = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        router.navigate(`/posts/${id}/edit`)
+    }
+    
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        onDelete?.(id)
+    }
+    
     return (
         <Card
             key={id}
+            onClick={handleCardClick}
             className='overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group border-border/50 hover:border-border py-0 min-h-32'>
             <div className='flex h-full flex-col md:flex-row'>
                 <div className='relative aspect-video overflow-hidden w-full md:w-35 xl:w-65 rounded-lg bg-muted h-full'>
@@ -42,14 +62,34 @@ export const ArticleCard: FC<ArticleCardProps> = ({ id, thumbnailUrl, title, sum
                             </div>
                         </div>
 
-                        <div className='flex items-center gap-3.5 text-sm text-muted-foreground'>
-                            <div className='flex items-center gap-1'>
-                                <Eye className='size-3.5' />
-                                <span>{viewCount.toLocaleString()}</span>
+                        <div className='flex items-center gap-2'>
+                            <div className='flex items-center gap-3.5 text-sm text-muted-foreground'>
+                                <div className='flex items-center gap-1'>
+                                    <Eye className='size-3.5' />
+                                    <span>{viewCount.toLocaleString()}</span>
+                                </div>
+                                <div className='flex items-center gap-1'>
+                                    <Heart className='size-3.5' />
+                                    <span>{likeCount.toLocaleString()}</span>
+                                </div>
                             </div>
-                            <div className='flex items-center gap-1'>
-                                <Heart className='size-3.5' />
-                                <span>{likeCount.toLocaleString()}</span>
+                            <div className='flex gap-1'>
+                                <Button 
+                                    onClick={handleEdit}
+                                    size='icon'
+                                    variant='ghost'
+                                    className='h-8 w-8'
+                                >
+                                    <Edit className='size-3.5' />
+                                </Button>
+                                <Button 
+                                    onClick={handleDelete}
+                                    size='icon'
+                                    variant='ghost'
+                                    className='h-8 w-8 text-destructive hover:text-destructive'
+                                >
+                                    <Trash2 className='size-3.5' />
+                                </Button>
                             </div>
                         </div>
                     </div>

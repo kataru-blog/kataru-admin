@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { useCreateAdminPost } from 'entities/posts'
+import { useCreateAdminPost, useUpdateAdminPost, useGetAdminPostById } from 'entities/posts'
 import { UserCard } from 'features'
 import { Calendar, Eye, Heart, X } from 'lucide-react'
 import { useEffect, useState, type KeyboardEvent } from 'react'
@@ -13,6 +13,7 @@ import { Label } from 'shared/ui/label'
 import { Switch } from 'shared/ui/switch'
 import { Textarea } from 'shared/ui/textarea'
 import { toast } from 'sonner'
+import { Skeleton } from 'shared/ui/skeleton'
 
 const DUMMY_USER = {
     createdAt: new Date(),
@@ -31,9 +32,12 @@ const DUMMY_USER = {
     ],
 }
 
-export const PostEditor = ({ id }: { id: string }) => {
+export const PostEditor = ({ id }: { id?: string }) => {
     const router = useRouter()
+    const isEditMode = !!id
+    const { data: existingPost, isLoading } = useGetAdminPostById(id || '')
     const createPost = useCreateAdminPost()
+    const updatePost = useUpdateAdminPost()
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
     const [thumbnailUrl, setThumbnailUrl] = useState('')
@@ -58,7 +62,7 @@ export const PostEditor = ({ id }: { id: string }) => {
         setTags(tags.filter((tag) => tag !== tagToRemove))
     }
 
-    const handleCreate = async () => {
+    const handleSave = async () => {
         if (!title.trim()) {
             toast.error('제목을 입력해주세요')
             return
@@ -70,28 +74,63 @@ export const PostEditor = ({ id }: { id: string }) => {
         }
 
         try {
-            const result = await createPost.mutateAsync({
-                title,
-                content,
-                thumbnailUrl: thumbnailUrl || undefined,
-                isNotice,
-                allowComment: allowComments,
-                tags: tags.length > 0 ? tags : undefined,
-            })
-
-            toast.success(`포스트가 생성되었습니다 (번호: ${result.postNumber})`)
-            router.navigate(`/posts/${result.id}`)
+            if (isEditMode) {
+                const result = await updatePost.mutateAsync({
+                    postId: id,
+                    data: {
+                        title,
+                        content,
+                        thumbnailUrl: thumbnailUrl || undefined,
+                        isNotice,
+                        allowComment: allowComments,
+                        tags: tags.length > 0 ? tags : undefined,
+                    }
+                })
+                toast.success('포스트가 수정되었습니다')
+                router.navigate(`/posts/${id}`)
+            } else {
+                const result = await createPost.mutateAsync({
+                    title,
+                    content,
+                    thumbnailUrl: thumbnailUrl || undefined,
+                    isNotice,
+                    allowComment: allowComments,
+                    tags: tags.length > 0 ? tags : undefined,
+                })
+                toast.success(`포스트가 생성되었습니다 (번호: ${result.postNumber})`)
+                router.navigate(`/posts/${result.id}`)
+            }
         } catch (error) {
-            toast.error('포스트 생성에 실패했습니다')
-            console.error('Failed to create post:', error)
+            toast.error(isEditMode ? '포스트 수정에 실패했습니다' : '포스트 생성에 실패했습니다')
+            console.error('Failed to save post:', error)
         }
     }
+
+    useEffect(() => {
+        if (isEditMode && existingPost) {
+            setTitle(existingPost.title)
+            setContent(existingPost.content)
+            setThumbnailUrl(existingPost.thumbnailUrl || '')
+            setIsNotice(existingPost.isNotice)
+            setAllowComments(existingPost.allowComment)
+            setTags(existingPost.tags || [])
+        }
+    }, [isEditMode, existingPost])
 
     useEffect(() => {
         toHTMLWithTOC(debouncedContent).then(({ html }) => {
             setHtml(html)
         })
     }, [debouncedContent])
+
+    if (isEditMode && isLoading) {
+        return (
+            <div className='flex flex-col gap-3.5 p-3.5'>
+                <Skeleton className='h-12 w-full' />
+                <Skeleton className='h-96 w-full' />
+            </div>
+        )
+    }
 
     return (
         <div className='relative flex flex-col md:flex-row h-svh'>
@@ -156,8 +195,12 @@ export const PostEditor = ({ id }: { id: string }) => {
                         </div>
                     </div>
 
-                    <Button onClick={handleCreate} className='w-full' disabled={createPost.isPending}>
-                        {createPost.isPending ? '생성 중...' : '포스트 생성'}
+                    <Button 
+                        onClick={handleSave} 
+                        className='w-full' 
+                        disabled={createPost.isPending || updatePost.isPending}
+                    >
+                        {(createPost.isPending || updatePost.isPending) ? '저장 중...' : (isEditMode ? '포스트 수정' : '포스트 생성')}
                     </Button>
                 </div>
             </div>
