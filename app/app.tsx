@@ -5,7 +5,7 @@ import { QueryProvider } from '@/shared/lib/query'
 import { Blog, Dashboard, Posts, Comments, Login, OAuthCallback } from 'pages'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Route, Router } from 'shared/lib/router'
+import { Route, Router, Routes } from 'shared/lib/router'
 
 const rootElement = document.getElementById('root')
 
@@ -17,16 +17,20 @@ createRoot(rootElement).render(
     <StrictMode>
         <QueryProvider>
             <Router>
-                <Route path='/login' element={Login} />
-                <Route path='/auth/callback' element={OAuthCallback} />
+                <Routes>
+                    <Route path='/login' element={Login} />
+                    <Route path='/auth/callback' element={OAuthCallback} />
+                </Routes>
                 <Layout>
-                    <Route path='/' element={Dashboard} />
-                    <Route path='/posts' element={Posts} />
-                    <Route path='/posts/create' element={PostEditor} />
-                    <Route path='/posts/:id' element={PostDetail} />
-                    <Route path='/posts/:id/edit' element={PostEditor} />
-                    <Route path='/comments' element={Comments} />
-                    <Route path='/blog' element={Blog} />
+                    <Routes>
+                        <Route path='/' element={Dashboard} />
+                        <Route path='/posts' element={Posts} />
+                        <Route path='/posts/create' element={PostEditor} />
+                        <Route path='/posts/:id/edit' element={PostEditor} />
+                        <Route path='/posts/:id' element={PostDetail} />
+                        <Route path='/comments' element={Comments} />
+                        <Route path='/blog' element={Blog} />
+                    </Routes>
                 </Layout>
             </Router>
         </QueryProvider>

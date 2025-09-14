@@ -37,8 +37,8 @@ export const DashboardCards = () => {
                         isSummaryLoading
                             ? '...'
                             : dashboardSummary
-                            ? ((dashboardSummary.totalLikes / dashboardSummary.totalViews) * 100).toFixed(1) + '%'
-                            : '0%'
+                              ? ((dashboardSummary.totalLikes / dashboardSummary.totalViews) * 100).toFixed(1) + '%'
+                              : '0%'
                     }
                     todayValue={undefined}
                 />

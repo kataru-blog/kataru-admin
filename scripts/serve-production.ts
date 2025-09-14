@@ -41,20 +41,19 @@ serve({
         const url = new URL(req.url)
         let pathname = url.pathname
 
-        // 정적 파일 처리 (JS, CSS, 이미지 등)
         if (pathname.includes('.')) {
             const filePath = join('./dist', pathname)
-            
+
             try {
                 const file = Bun.file(filePath)
                 const exists = await file.exists()
-                
+
                 if (exists) {
                     const mimeType = getMimeType(pathname)
                     return new Response(file, {
                         headers: {
-                            'Content-Type': mimeType
-                        }
+                            'Content-Type': mimeType,
+                        },
                     })
                 } else {
                     return new Response('Not Found', { status: 404 })
@@ -64,19 +63,17 @@ serve({
             }
         }
 
-        // SPA 라우팅 처리 - 모든 경로를 index.html로
         return new Response(Bun.file('./dist/index.html'), {
             headers: {
-                'Content-Type': 'text/html'
-            }
+                'Content-Type': 'text/html',
+            },
         })
     },
     error() {
-        // 파일이 없으면 index.html 반환 (SPA 라우팅)
         return new Response(Bun.file('./dist/index.html'), {
             headers: {
-                'Content-Type': 'text/html'
-            }
+                'Content-Type': 'text/html',
+            },
         })
     },
 })

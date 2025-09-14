@@ -15,21 +15,21 @@ interface ArticleCardProps extends Pick<Post, 'id' | 'thumbnailUrl' | 'title' | 
 
 export const ArticleCard: FC<ArticleCardProps> = ({ id, thumbnailUrl, title, summary, createdAt, user, viewCount, likeCount, onDelete }) => {
     const router = useRouter()
-    
+
     const handleCardClick = () => {
         router.navigate(`/posts/${id}`)
     }
-    
+
     const handleEdit = (e: React.MouseEvent) => {
         e.stopPropagation()
         router.navigate(`/posts/${id}/edit`)
     }
-    
+
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation()
         onDelete?.(id)
     }
-    
+
     return (
         <Card
             key={id}
@@ -74,20 +74,14 @@ export const ArticleCard: FC<ArticleCardProps> = ({ id, thumbnailUrl, title, sum
                                 </div>
                             </div>
                             <div className='flex gap-1'>
-                                <Button 
-                                    onClick={handleEdit}
-                                    size='icon'
-                                    variant='ghost'
-                                    className='h-8 w-8'
-                                >
+                                <Button onClick={handleEdit} size='icon' variant='ghost' className='h-8 w-8'>
                                     <Edit className='size-3.5' />
                                 </Button>
-                                <Button 
+                                <Button
                                     onClick={handleDelete}
                                     size='icon'
                                     variant='ghost'
-                                    className='h-8 w-8 text-destructive hover:text-destructive'
-                                >
+                                    className='h-8 w-8 text-destructive hover:text-destructive'>
                                     <Trash2 className='size-3.5' />
                                 </Button>
                             </div>

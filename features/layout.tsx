@@ -25,11 +25,11 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
     const pathname = usePathname()
     const router = useRouter()
 
-    // useEffect(() => {
-    //     if (!isLoading && !session?.user?.id && pathname !== '/login') {
-    //         router.navigate('/login')
-    //     }
-    // }, [isLoading, session, pathname, router])
+    useEffect(() => {
+        if (!isLoading && !session?.user?.id && pathname !== '/login') {
+            router.navigate('/login')
+        }
+    }, [isLoading, session, pathname, router])
 
     if (pathname === '/login') {
         return <>{children}</>

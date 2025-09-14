@@ -45,16 +45,9 @@ export interface Verification {
     updatedAt?: Date
 }
 
+export type SessionUser = Pick<User, 'id' | 'name' | 'email' | 'nickname' | 'emailVerified' | 'image' | 'createdAt' | 'updatedAt'>
 
-export type SessionUser = Pick<
-    User,
-    'id' | 'name' | 'email' | 'nickname' | 'emailVerified' | 'image' | 'createdAt' | 'updatedAt'
->
-
-export type SessionData = Pick<
-    Session,
-    'id' | 'expiresAt' | 'token' | 'createdAt' | 'updatedAt' | 'ipAddress' | 'userAgent' | 'userId'
->
+export type SessionData = Pick<Session, 'id' | 'expiresAt' | 'token' | 'createdAt' | 'updatedAt' | 'ipAddress' | 'userAgent' | 'userId'>
 
 export type SessionResponse = {
     user: SessionUser

@@ -31,7 +31,7 @@ export const useGetBlogInfo = () => {
 
 export const useUpdateBlogInfo = () => {
     const queryClient = useQueryClient()
-    
+
     return useMutation({
         mutationFn: updateBlogInfo,
         onSuccess: () => {
@@ -49,7 +49,7 @@ export const useGetCustomDomains = () => {
 
 export const useCreateCustomDomain = () => {
     const queryClient = useQueryClient()
-    
+
     return useMutation({
         mutationFn: createCustomDomain,
         onSuccess: () => {
@@ -60,10 +60,9 @@ export const useCreateCustomDomain = () => {
 
 export const useUpdateCustomDomain = () => {
     const queryClient = useQueryClient()
-    
+
     return useMutation({
-        mutationFn: ({ domainId, data }: { domainId: string; data: UpdateCustomDomainRequest }) => 
-            updateCustomDomain(domainId, data),
+        mutationFn: ({ domainId, data }: { domainId: string; data: UpdateCustomDomainRequest }) => updateCustomDomain(domainId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BLOG.DOMAINS] })
         },
@@ -72,7 +71,7 @@ export const useUpdateCustomDomain = () => {
 
 export const useDeleteCustomDomain = () => {
     const queryClient = useQueryClient()
-    
+
     return useMutation({
         mutationFn: deleteCustomDomain,
         onSuccess: () => {
@@ -90,7 +89,7 @@ export const useGetCustomLinks = () => {
 
 export const useCreateCustomLink = () => {
     const queryClient = useQueryClient()
-    
+
     return useMutation({
         mutationFn: createCustomLink,
         onSuccess: () => {
@@ -101,10 +100,9 @@ export const useCreateCustomLink = () => {
 
 export const useUpdateCustomLink = () => {
     const queryClient = useQueryClient()
-    
+
     return useMutation({
-        mutationFn: ({ linkId, data }: { linkId: string; data: UpdateCustomLinkRequest }) => 
-            updateCustomLink(linkId, data),
+        mutationFn: ({ linkId, data }: { linkId: string; data: UpdateCustomLinkRequest }) => updateCustomLink(linkId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BLOG.LINKS] })
         },
@@ -113,7 +111,7 @@ export const useUpdateCustomLink = () => {
 
 export const useDeleteCustomLink = () => {
     const queryClient = useQueryClient()
-    
+
     return useMutation({
         mutationFn: deleteCustomLink,
         onSuccess: () => {
@@ -124,7 +122,7 @@ export const useDeleteCustomLink = () => {
 
 export const useReorderCustomLinks = () => {
     const queryClient = useQueryClient()
-    
+
     return useMutation({
         mutationFn: reorderCustomLinks,
         onSuccess: () => {

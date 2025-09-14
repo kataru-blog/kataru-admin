@@ -69,7 +69,7 @@ const UserCardContent: FC<UserCardContentProps> = ({ user, className }) => {
     )
 }
 
-export const UserCard: FC<BlogUserCardProps> = ({ user, blogDescription, className }) => {
+export const UserCard: FC<Partial<BlogUserCardProps>> = ({ user, blogDescription, className }) => {
     return (
         <div className={className}>
             <div className='flex items-start sm:items-center size-full flex-col sm:flex-row border-b border-border'>

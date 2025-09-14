@@ -1,14 +1,11 @@
+import { useGetSession } from '@/entities/user'
 import dayjs from 'dayjs'
 import { useDeleteAdminPost, useGetAdminPostById } from 'entities/posts'
 import { SiteHeader, UserCard } from 'features'
 import { Calendar, Edit, Eye, Heart, Trash2 } from 'lucide-react'
+import { useEffect, useState, type ComponentProps } from 'react'
 import { useRouter } from 'shared/lib/router'
 import { toHTMLWithTOC } from 'shared/lib/utils'
-import { Badge } from 'shared/ui/badge'
-import { Button } from 'shared/ui/button'
-import { Skeleton } from 'shared/ui/skeleton'
-import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -19,6 +16,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from 'shared/ui/alert-dialog'
+import { Badge } from 'shared/ui/badge'
+import { Button } from 'shared/ui/button'
+import { Skeleton } from 'shared/ui/skeleton'
+import { toast } from 'sonner'
 
 export const PostDetail = ({ id }: { id: string }) => {
     const router = useRouter()
@@ -26,6 +27,7 @@ export const PostDetail = ({ id }: { id: string }) => {
     const deletePost = useDeleteAdminPost()
     const [__html, setHtml] = useState('')
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+    const { data: session } = useGetSession()
 
     useEffect(() => {
         if (post?.content) {
@@ -85,11 +87,7 @@ export const PostDetail = ({ id }: { id: string }) => {
             <div className='flex flex-col gap-6 max-w-4xl mx-auto w-full'>
                 {post.thumbnailUrl && (
                     <div className='relative aspect-video overflow-hidden rounded-lg'>
-                        <img
-                            src={post.thumbnailUrl}
-                            alt={post.title}
-                            className='size-full object-cover'
-                        />
+                        <img src={post.thumbnailUrl} alt={post.title} className='size-full object-cover' />
                     </div>
                 )}
 
@@ -111,8 +109,8 @@ export const PostDetail = ({ id }: { id: string }) => {
                 {post.tags && post.tags.length > 0 && (
                     <div className='flex flex-wrap gap-2'>
                         {post.tags.map((tag, idx) => (
-                            <Badge variant='secondary' key={tag + idx}>
-                                {tag}
+                            <Badge variant='secondary' key={tag.id + idx}>
+                                {tag.name}
                             </Badge>
                         ))}
                     </div>
@@ -142,11 +140,11 @@ export const PostDetail = ({ id }: { id: string }) => {
                     </div>
                 </div>
 
-                {post.user && (
+                {session?.user && (
                     <div className='border-t pt-6'>
-                        <UserCard 
-                            blogDescription={post.user.bio || ''} 
-                            user={post.user} 
+                        <UserCard
+                            blogDescription={session?.user.nickname || ''}
+                            user={{ ...session.user, customLinks: [] } as ComponentProps<typeof UserCard>['user']}
                         />
                     </div>
                 )}
@@ -156,9 +154,7 @@ export const PostDetail = ({ id }: { id: string }) => {
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>정말 삭제하시겠습니까?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            이 작업은 되돌릴 수 없습니다. 포스트가 영구적으로 삭제됩니다.
-                        </AlertDialogDescription>
+                        <AlertDialogDescription>이 작업은 되돌릴 수 없습니다. 포스트가 영구적으로 삭제됩니다.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>취소</AlertDialogCancel>

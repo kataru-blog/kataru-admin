@@ -12,7 +12,7 @@ export const useGetAdminComments = (params?: AdminCommentsListParams) => {
 
 export const useDeleteAdminComment = () => {
     const queryClient = useQueryClient()
-    
+
     return useMutation({
         mutationFn: deleteAdminComment,
         onSuccess: () => {

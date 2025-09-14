@@ -1,11 +1,4 @@
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from 'shared/ui/pagination'
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from 'shared/ui/pagination'
 import type { FC } from 'react'
 
 interface PaginatorProps {
@@ -38,19 +31,14 @@ export const Paginator: FC<PaginatorProps> = ({ currentPage, totalPages, onPageC
 
                 {[...Array(totalPages)].map((_, index) => {
                     const pageNumber = index + 1
-                    if (
-                        pageNumber === 1 ||
-                        pageNumber === totalPages ||
-                        (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-                    ) {
+                    if (pageNumber === 1 || pageNumber === totalPages || (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)) {
                         return (
                             <PaginationItem key={pageNumber}>
                                 <PaginationLink
                                     size='sm'
                                     onClick={() => handlePageChange(pageNumber)}
                                     isActive={pageNumber === currentPage}
-                                    className='cursor-pointer'
-                                >
+                                    className='cursor-pointer'>
                                     {pageNumber}
                                 </PaginationLink>
                             </PaginationItem>

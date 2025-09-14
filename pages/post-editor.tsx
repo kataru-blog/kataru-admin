@@ -1,8 +1,11 @@
+import { useGetSession } from '@/entities/user'
+import { Editor } from '@/features/editor'
 import dayjs from 'dayjs'
-import { useCreateAdminPost, useUpdateAdminPost, useGetAdminPostById } from 'entities/posts'
+import { useCreateAdminPost, useGetAdminPostById, useUpdateAdminPost } from 'entities/posts'
 import { UserCard } from 'features'
+import hljs from 'highlight.js/lib/core'
 import { Calendar, Eye, Heart, X } from 'lucide-react'
-import { useEffect, useState, type KeyboardEvent } from 'react'
+import { useEffect, useState, type ComponentProps, type KeyboardEvent } from 'react'
 import { useDebounce } from 'shared/hooks/use-debounce'
 import { useRouter } from 'shared/lib/router'
 import { toHTMLWithTOC } from 'shared/lib/utils'
@@ -10,29 +13,12 @@ import { Badge } from 'shared/ui/badge'
 import { Button } from 'shared/ui/button'
 import { Input } from 'shared/ui/input'
 import { Label } from 'shared/ui/label'
-import { Switch } from 'shared/ui/switch'
-import { Textarea } from 'shared/ui/textarea'
-import { toast } from 'sonner'
 import { Skeleton } from 'shared/ui/skeleton'
-
-const DUMMY_USER = {
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    emailVerified: true,
-    image: 'https://example.com/image.jpg',
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    nickname: 'john',
-    id: '1',
-    customLinks: [
-        {
-            url: 'https://example.com',
-            label: 'Example',
-        },
-    ],
-}
+import { Switch } from 'shared/ui/switch'
+import { toast } from 'sonner'
 
 export const PostEditor = ({ id }: { id?: string }) => {
+    const { data: session } = useGetSession()
     const router = useRouter()
     const isEditMode = !!id
     const { data: existingPost, isLoading } = useGetAdminPostById(id || '')
@@ -46,7 +32,7 @@ export const PostEditor = ({ id }: { id?: string }) => {
     const [tags, setTags] = useState<string[]>([])
     const [tagInput, setTagInput] = useState('')
     const [__html, setHtml] = useState('')
-    const debouncedContent = useDebounce(content, 500)
+    const debouncedContent = useDebounce(content, 100)
 
     const handleTagInput = (e: KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && tagInput.trim()) {
@@ -75,7 +61,7 @@ export const PostEditor = ({ id }: { id?: string }) => {
 
         try {
             if (isEditMode) {
-                const result = await updatePost.mutateAsync({
+                await updatePost.mutateAsync({
                     postId: id,
                     data: {
                         title,
@@ -84,7 +70,7 @@ export const PostEditor = ({ id }: { id?: string }) => {
                         isNotice,
                         allowComment: allowComments,
                         tags: tags.length > 0 ? tags : undefined,
-                    }
+                    },
                 })
                 toast.success('포스트가 수정되었습니다')
                 router.navigate(`/posts/${id}`)
@@ -113,7 +99,7 @@ export const PostEditor = ({ id }: { id?: string }) => {
             setThumbnailUrl(existingPost.thumbnailUrl || '')
             setIsNotice(existingPost.isNotice)
             setAllowComments(existingPost.allowComment)
-            setTags(existingPost.tags || [])
+            setTags(existingPost.tags.map((tag) => tag.name) || [])
         }
     }, [isEditMode, existingPost])
 
@@ -144,15 +130,7 @@ export const PostEditor = ({ id }: { id?: string }) => {
                         onChange={(e) => setTitle(e.target.value)}
                     />
                 </div>
-                <article className='flex gap-2 justify-center mx-auto p-7 overflow-y-auto size-full'>
-                    <Textarea
-                        id='content'
-                        placeholder='Write your post content...'
-                        className='size-full border-none p-0 shadow-none focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0 resize-none'
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                    />
-                </article>
+                <Editor content={content} setContent={setContent} />
 
                 <div className='grid gap-2 border-t p-3.5'>
                     <Label htmlFor='tags'>Tags</Label>
@@ -195,12 +173,8 @@ export const PostEditor = ({ id }: { id?: string }) => {
                         </div>
                     </div>
 
-                    <Button 
-                        onClick={handleSave} 
-                        className='w-full' 
-                        disabled={createPost.isPending || updatePost.isPending}
-                    >
-                        {(createPost.isPending || updatePost.isPending) ? '저장 중...' : (isEditMode ? '포스트 수정' : '포스트 생성')}
+                    <Button onClick={handleSave} className='w-full' disabled={createPost.isPending || updatePost.isPending}>
+                        {createPost.isPending || updatePost.isPending ? '저장 중...' : isEditMode ? '포스트 수정' : '포스트 생성'}
                     </Button>
                 </div>
             </div>
@@ -235,7 +209,10 @@ export const PostEditor = ({ id }: { id?: string }) => {
                     </section>
                 </article>
                 <div className='border-t border-border mt-5'>
-                    <UserCard blogDescription='Example blog description' user={DUMMY_USER} />
+                    <UserCard
+                        blogDescription='Example blog description'
+                        user={{ ...session?.user, customLinks: [] } as ComponentProps<typeof UserCard>['user']}
+                    />
                 </div>
             </section>
         </div>

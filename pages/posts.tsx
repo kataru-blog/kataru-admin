@@ -28,13 +28,7 @@ export const Posts: FC = () => {
                 sortOrder={sortOrder}
                 setSortOrder={setSortOrder}
             />
-            <PostsList 
-                searchKeyword={searchKeyword} 
-                sortBy={sortBy} 
-                sortOrder={sortOrder}
-                currentPage={currentPage}
-                onPageChange={setCurrentPage}
-            />
+            <PostsList searchKeyword={searchKeyword} sortBy={sortBy} sortOrder={sortOrder} currentPage={currentPage} onPageChange={setCurrentPage} />
         </div>
     )
 }

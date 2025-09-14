@@ -33,6 +33,15 @@ export const Route = <T extends Record<string, unknown> = Record<string, unknown
 
         if (pathParts.length !== currentParts.length) return false
 
+        const hasStaticPart = pathParts.every((part, index) => {
+            if (!part.startsWith(':')) {
+                return part === currentParts[index]
+            }
+            return true
+        })
+
+        if (!hasStaticPart) return false
+
         return pathParts.every((part, index) => {
             if (part.startsWith(':')) return true
             return part === currentParts[index]

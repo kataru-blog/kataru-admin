@@ -10,18 +10,8 @@ export const Comments: FC = () => {
     return (
         <div className='flex flex-col gap-3.5 p-3.5'>
             <SiteHeader title='Comments Management' description='Manage user comments on your posts' />
-            <CommentsFilters
-                searchKeyword={searchKeyword}
-                setSearchKeyword={setSearchKeyword}
-                sortOrder={sortOrder}
-                setSortOrder={setSortOrder}
-            />
-            <CommentsList 
-                searchKeyword={searchKeyword} 
-                sortOrder={sortOrder}
-                currentPage={currentPage}
-                onPageChange={setCurrentPage}
-            />
+            <CommentsFilters searchKeyword={searchKeyword} setSearchKeyword={setSearchKeyword} sortOrder={sortOrder} setSortOrder={setSortOrder} />
+            <CommentsList searchKeyword={searchKeyword} sortOrder={sortOrder} currentPage={currentPage} onPageChange={setCurrentPage} />
         </div>
     )
 }
