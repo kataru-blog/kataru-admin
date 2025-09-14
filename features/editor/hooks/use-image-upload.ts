@@ -59,6 +59,29 @@ export const useImageUpload = ({ editorRef, onImageInsert, postId }: UseImageUpl
             return
         }
 
+        // Create unique placeholder ID
+        const placeholderId = `uploading-${Date.now()}`
+        const placeholderMarkdown = `![Uploading...](${placeholderId})`
+
+        // Insert placeholder immediately
+        if (editorRef.current) {
+            restoreCursorPosition()
+            const selection = window.getSelection()
+            if (selection && selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0)
+                range.deleteContents()
+                const textNode = document.createTextNode(placeholderMarkdown)
+                range.insertNode(textNode)
+                range.setStartAfter(textNode)
+                range.setEndAfter(textNode)
+                selection.removeAllRanges()
+                selection.addRange(range)
+            } else {
+                editorRef.current.innerText += placeholderMarkdown
+            }
+            onImageInsert(editorRef.current.innerText)
+        }
+
         setIsUploading(true)
         try {
             const currentPostId = postId || (router.query.id as string) || 'temp'
@@ -68,32 +91,54 @@ export const useImageUpload = ({ editorRef, onImageInsert, postId }: UseImageUpl
                 throw new Error('Upload failed')
             }
 
-            restoreCursorPosition()
-
-            const markdown = `![${file.name}](${result.data.url})`
-
+            // Replace placeholder with actual URL
             if (editorRef.current) {
-                const selection = window.getSelection()
-                if (selection && selection.rangeCount > 0) {
-                    const range = selection.getRangeAt(0)
-                    range.deleteContents()
-                    const textNode = document.createTextNode(markdown)
-                    range.insertNode(textNode)
-                    range.setStartAfter(textNode)
-                    range.setEndAfter(textNode)
-                    selection.removeAllRanges()
-                    selection.addRange(range)
-                } else {
-                    editorRef.current.innerText += markdown
+                const currentText = editorRef.current.innerText
+                // Extract base URL without variant suffix
+                let imageUrl = result.data.url
+
+                // If URL ends with /pc.webp or similar pattern, extract base URL
+                const match = imageUrl.match(/^(.+?)(?:\/(pc|tablet|mobile|thumbnail|original)\.\w+)?$/)
+                if (match && match[1]) {
+                    imageUrl = match[1]
                 }
 
-                onImageInsert(editorRef.current.innerText)
+                const actualMarkdown = `![${file.name}](${imageUrl})`
+                const updatedText = currentText.replace(placeholderMarkdown, actualMarkdown)
+
+                editorRef.current.innerText = updatedText
+                onImageInsert(updatedText)
+
+                // Set cursor position after the inserted image
+                const textNode = editorRef.current.firstChild || editorRef.current
+                const position = updatedText.indexOf(actualMarkdown) + actualMarkdown.length
+                const range = document.createRange()
+                const selection = window.getSelection()
+
+                if (textNode.nodeType === Node.TEXT_NODE) {
+                    range.setStart(textNode, Math.min(position, textNode.textContent?.length || 0))
+                    range.setEnd(textNode, Math.min(position, textNode.textContent?.length || 0))
+                } else {
+                    range.selectNodeContents(editorRef.current)
+                    range.collapse(false)
+                }
+
+                selection?.removeAllRanges()
+                selection?.addRange(range)
             }
 
             toast.success('이미지가 업로드되었습니다')
         } catch (error) {
             console.error('Image upload failed:', error)
             toast.error('이미지 업로드에 실패했습니다')
+
+            // Remove placeholder on error
+            if (editorRef.current) {
+                const currentText = editorRef.current.innerText
+                const updatedText = currentText.replace(placeholderMarkdown, '')
+                editorRef.current.innerText = updatedText
+                onImageInsert(updatedText)
+            }
         } finally {
             setIsUploading(false)
             if (fileInputRef.current) {
