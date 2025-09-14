@@ -1,41 +1,42 @@
 export interface ImageVariants {
-    small?: string
-    medium?: string
-    large?: string
+    mobile: string
+    tablet: string
+    pc: string
+    thumbnail: string
+    original: string
 }
 
 export interface UploadImageRequest {
     file: File
-    postId: string
+    postId?: string
+    blogId?: string
 }
 
 export interface UploadImageResponse {
     success: boolean
     data: {
         id: string
+        postId: string | null
+        blogId: string | null
         url: string
         thumbnailUrl: string
         variants: ImageVariants
     }
 }
 
-export interface ImageWithDetails {
+export interface ImageData {
     id: string
-    postId: string
+    postId: string | null
+    blogId: string | null
     originalUrl: string
     thumbnailUrl: string
-    r2Key: string
-    width?: number
-    height?: number
-    size?: number
-    mimeType?: string
     createdAt: string
     variants: ImageVariants
 }
 
 export interface GetImagesResponse {
     success: boolean
-    data: ImageWithDetails[]
+    data: ImageData[]
 }
 
 export interface DeleteImageResponse {

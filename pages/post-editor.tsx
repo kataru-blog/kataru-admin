@@ -3,7 +3,7 @@ import { Editor } from '@/features/editor'
 import { Toaster } from '@/shared/ui/sonner'
 import dayjs from 'dayjs'
 import { useCreateAdminPost, useGetAdminPostById, useUpdateAdminPost } from 'entities/posts'
-import { useGetImagesByPostId } from 'entities/cf-images'
+import { useGetImagesByPostId } from 'entities/images'
 import { UserCard } from 'features'
 import { Calendar, Eye, Heart, X } from 'lucide-react'
 import { useEffect, useState, type ComponentProps, type KeyboardEvent } from 'react'
@@ -176,15 +176,15 @@ export const PostEditor = ({ id }: { id?: string }) => {
                                 uploadedImages.map((image) => (
                                     <div key={image.id} className='relative h-full flex-shrink-0'>
                                         <img
-                                            src={image.thumbnailUrl || image.originalUrl}
-                                            alt={image.r2Key}
+                                            src={image.thumbnailUrl}
+                                            alt={image.id}
                                             className={`h-full object-cover cursor-pointer ${
-                                                thumbnailUrl === image.originalUrl ? 'ring-2 ring-primary' : ''
+                                                thumbnailUrl === image.variants?.pc ? 'ring-2 ring-primary' : ''
                                             }`}
-                                            onClick={() => copyImageMarkdownText(image.originalUrl, image.r2Key)}
+                                            onClick={() => copyImageMarkdownText(image.variants?.pc || image.originalUrl, image.id)}
                                             onContextMenu={(e) => {
                                                 e.preventDefault()
-                                                handleThumbnailSelect(image.originalUrl)
+                                                handleThumbnailSelect(image.variants?.pc || image.originalUrl)
                                             }}
                                         />
                                     </div>

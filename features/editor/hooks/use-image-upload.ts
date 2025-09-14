@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { useUploadImage } from '@/entities/cf-images'
+import { useUploadImage } from '@/entities/images'
 import { useRouter } from '@/shared/lib/router'
 
 interface UseImageUploadProps {
