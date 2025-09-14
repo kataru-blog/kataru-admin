@@ -21,11 +21,7 @@ export const toHTMLWithTOC = async (markdown: string) => {
 
     const schema: Schema = {
         ...defaultSchema,
-        tagNames: [
-            ...(defaultSchema.tagNames ?? []),
-            'picture',
-            'source',
-        ],
+        tagNames: [...(defaultSchema.tagNames ?? []), 'picture', 'source'],
         attributes: {
             ...defaultSchema.attributes,
             code: [...(defaultSchema.attributes?.code ?? []), ['className', /^language-/]],
@@ -52,12 +48,8 @@ export const toHTMLWithTOC = async (markdown: string) => {
             h4: ['id'],
             h5: ['id'],
             h6: ['id'],
-            img: [
-                ...(defaultSchema.attributes?.img ?? []),
-                'loading',
-                'decoding',
-            ],
-            picture: [],
+            img: [...(defaultSchema.attributes?.img ?? []), 'loading', 'decoding', 'style'],
+            picture: ['style'],
             source: ['media', 'srcSet', 'type'],
         },
     }
@@ -94,19 +86,26 @@ export const toHTMLWithTOC = async (markdown: string) => {
         visit(tree, 'element', (node: Element, index: number | undefined, parent: Element | Root | undefined) => {
             if (node.tagName === 'img' && parent && Array.isArray(parent.children) && typeof index === 'number') {
                 const src = node.properties?.src as string | undefined
-                const alt = node.properties?.alt as string | undefined
+                let alt = node.properties?.alt as string | undefined
 
                 if (!src) return
 
-                // Check if URL has file extension
+                let customWidth: string | undefined
+                if (alt) {
+                    const widthMatch = alt.match(/\{width:(\d+)\}/)
+                    if (widthMatch) {
+                        customWidth = `${widthMatch[1]}px`
+                        alt = alt.replace(/\{width:\d+\}/, '').trim()
+                    }
+                }
+
                 const hasExtension = /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(src)
 
                 if (!hasExtension && src.includes('/r2/images/')) {
-                    // Create responsive picture element
                     const pictureElement: Element = {
                         type: 'element',
                         tagName: 'picture',
-                        properties: {},
+                        properties: customWidth ? { style: `width: ${customWidth}; max-width: 100%;` } : {},
                         children: [
                             {
                                 type: 'element',
@@ -145,6 +144,7 @@ export const toHTMLWithTOC = async (markdown: string) => {
                                     alt: alt || '',
                                     loading: 'lazy',
                                     decoding: 'async',
+                                    style: customWidth ? `width: ${customWidth}; max-width: 100%; height: auto;` : 'max-width: 100%; height: auto;',
                                 },
                                 children: [],
                             },
@@ -153,11 +153,12 @@ export const toHTMLWithTOC = async (markdown: string) => {
 
                     parent.children[index] = pictureElement
                 } else {
-                    // Add loading and decoding attributes to regular images
                     node.properties = {
                         ...node.properties,
+                        alt: alt || '',
                         loading: 'lazy',
                         decoding: 'async',
+                        style: customWidth ? `width: ${customWidth}; max-width: 100%; height: auto;` : 'max-width: 100%; height: auto;',
                     }
                 }
             }
