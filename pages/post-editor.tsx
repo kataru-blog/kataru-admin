@@ -173,22 +173,31 @@ export const PostEditor = ({ id }: { id?: string }) => {
 
                         <section className='flex gap-2 items-center h-16 relative overflow-x-auto'>
                             {uploadedImages.length > 0 ? (
-                                uploadedImages.map((image) => (
-                                    <div key={image.id} className='relative h-full flex-shrink-0'>
-                                        <img
-                                            src={image.thumbnailUrl}
-                                            alt={image.id}
-                                            className={`h-full object-cover cursor-pointer ${
-                                                thumbnailUrl === image.variants?.pc ? 'ring-2 ring-primary' : ''
-                                            }`}
-                                            onClick={() => copyImageMarkdownText(image.variants?.pc || image.originalUrl, image.id)}
-                                            onContextMenu={(e) => {
-                                                e.preventDefault()
-                                                handleThumbnailSelect(image.variants?.pc || image.originalUrl)
-                                            }}
-                                        />
-                                    </div>
-                                ))
+                                uploadedImages.map((image) => {
+                                    const getBaseUrl = (url: string) => {
+                                        const match = url.match(/^(.+?)(?:\/(pc|tablet|mobile|thumbnail|original)\.\w+)?$/)
+                                        return match && match[1] ? match[1] : url
+                                    }
+
+                                    const baseUrl = getBaseUrl(image.originalUrl)
+
+                                    return (
+                                        <div key={image.id} className='relative h-full flex-shrink-0'>
+                                            <img
+                                                src={image.thumbnailUrl}
+                                                alt={image.id}
+                                                className={`h-full object-cover cursor-pointer ${
+                                                    thumbnailUrl === baseUrl ? 'ring-2 ring-primary' : ''
+                                                }`}
+                                                onClick={() => copyImageMarkdownText(baseUrl, image.id)}
+                                                onContextMenu={(e) => {
+                                                    e.preventDefault()
+                                                    handleThumbnailSelect(baseUrl)
+                                                }}
+                                            />
+                                        </div>
+                                    )
+                                })
                             ) : (
                                 <div className='text-xs text-muted-foreground'>업로드된 이미지가 없습니다</div>
                             )}
