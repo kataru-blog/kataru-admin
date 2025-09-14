@@ -3,7 +3,7 @@ import { Editor } from '@/features/editor'
 import { Toaster } from '@/shared/ui/sonner'
 import dayjs from 'dayjs'
 import { useCreateAdminPost, useGetAdminPostById, useUpdateAdminPost } from 'entities/posts'
-import { useGetImagesByPostId } from 'entities/images'
+import { useGetImagesByPostId, useDeleteImage } from 'entities/images'
 import { UserCard } from 'features'
 import { Calendar, Eye, Heart, X } from 'lucide-react'
 import { useEffect, useState, type ComponentProps, type KeyboardEvent } from 'react'
@@ -36,6 +36,7 @@ export const PostEditor = ({ id }: { id?: string }) => {
     const debouncedContent = useDebounce(content, 100)
     const { data: imagesData } = useGetImagesByPostId(id || 'temp')
     const uploadedImages = imagesData?.data || []
+    const deleteImage = useDeleteImage()
 
     const copyImageMarkdownText = (imageUrl: string, imageName?: string) => {
         const name = imageName || imageUrl.split('/').pop() || 'image'
@@ -46,6 +47,18 @@ export const PostEditor = ({ id }: { id?: string }) => {
     const handleThumbnailSelect = (imageUrl: string) => {
         setThumbnailUrl(imageUrl)
         toast.success('썸네일이 설정되었습니다')
+    }
+
+    const handleImageDelete = async (imageId: string, e: React.MouseEvent) => {
+        e.stopPropagation()
+
+        try {
+            await deleteImage.mutateAsync(imageId)
+            toast.success('이미지가 삭제되었습니다')
+        } catch (error) {
+            console.error('Failed to delete image:', error)
+            toast.error('이미지 삭제에 실패했습니다')
+        }
     }
 
     const handleTagInput = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -182,7 +195,7 @@ export const PostEditor = ({ id }: { id?: string }) => {
                                     const baseUrl = getBaseUrl(image.originalUrl)
 
                                     return (
-                                        <div key={image.id} className='relative h-full flex-shrink-0'>
+                                        <div key={image.id} className='relative h-full flex-shrink-0 group'>
                                             <img
                                                 src={image.thumbnailUrl}
                                                 alt={image.id}
@@ -195,6 +208,12 @@ export const PostEditor = ({ id }: { id?: string }) => {
                                                     handleThumbnailSelect(baseUrl)
                                                 }}
                                             />
+                                            <button
+                                                onClick={(e) => handleImageDelete(image.id, e)}
+                                                className='absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity'
+                                                aria-label='Delete image'>
+                                                <X className='size-3.5' />
+                                            </button>
                                         </div>
                                     )
                                 })

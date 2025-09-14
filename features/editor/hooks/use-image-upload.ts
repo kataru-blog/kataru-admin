@@ -59,11 +59,9 @@ export const useImageUpload = ({ editorRef, onImageInsert, postId }: UseImageUpl
             return
         }
 
-        // Create unique placeholder ID
         const placeholderId = `uploading-${Date.now()}`
         const placeholderMarkdown = `![Uploading...](${placeholderId})`
 
-        // Insert placeholder immediately
         if (editorRef.current) {
             restoreCursorPosition()
             const selection = window.getSelection()
@@ -91,13 +89,10 @@ export const useImageUpload = ({ editorRef, onImageInsert, postId }: UseImageUpl
                 throw new Error('Upload failed')
             }
 
-            // Replace placeholder with actual URL
             if (editorRef.current) {
                 const currentText = editorRef.current.innerText
-                // Extract base URL without variant suffix
                 let imageUrl = result.data.url
 
-                // If URL ends with /pc.webp or similar pattern, extract base URL
                 const match = imageUrl.match(/^(.+?)(?:\/(pc|tablet|mobile|thumbnail|original)\.\w+)?$/)
                 if (match && match[1]) {
                     imageUrl = match[1]
@@ -109,7 +104,6 @@ export const useImageUpload = ({ editorRef, onImageInsert, postId }: UseImageUpl
                 editorRef.current.innerText = updatedText
                 onImageInsert(updatedText)
 
-                // Set cursor position after the inserted image
                 const textNode = editorRef.current.firstChild || editorRef.current
                 const position = updatedText.indexOf(actualMarkdown) + actualMarkdown.length
                 const range = document.createRange()
@@ -132,7 +126,6 @@ export const useImageUpload = ({ editorRef, onImageInsert, postId }: UseImageUpl
             console.error('Image upload failed:', error)
             toast.error('이미지 업로드에 실패했습니다')
 
-            // Remove placeholder on error
             if (editorRef.current) {
                 const currentText = editorRef.current.innerText
                 const updatedText = currentText.replace(placeholderMarkdown, '')
