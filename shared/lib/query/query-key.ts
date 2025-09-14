@@ -22,4 +22,7 @@ export const QUERY_KEY = {
         INFO: 'user-info',
         SESSION: 'user-session',
     },
+    IMAGES: {
+        LIST: 'images-list',
+    },
 }

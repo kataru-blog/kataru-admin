@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { QUERY_KEY } from 'shared/lib/query'
 import type { AdminPostsListParams, CreateAdminPostRequest, UpdateAdminPostRequest } from '../types'
-import { createAdminPost, deleteAdminPost, getAdminPostById, getAdminPosts, updateAdminPost } from './posts.api'
 import { useGetSession } from '../user'
+import { createAdminPost, deleteAdminPost, getAdminPostById, getAdminPosts, updateAdminPost } from './posts.api'
 
 export const useGetAdminPosts = (params?: AdminPostsListParams) => {
     return useQuery({
@@ -21,15 +21,9 @@ export const useGetAdminPostById = (postId: string) => {
 
 export const useCreateAdminPost = () => {
     const queryClient = useQueryClient()
-    const { data: session } = useGetSession()
 
     return useMutation({
-        mutationFn: (data: CreateAdminPostRequest) => {
-            return createAdminPost({
-                ...data,
-                userId: session?.user?.id,
-            })
-        },
+        mutationFn: (data: CreateAdminPostRequest) => createAdminPost(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY.POSTS.LIST] })
         },
@@ -38,15 +32,9 @@ export const useCreateAdminPost = () => {
 
 export const useUpdateAdminPost = () => {
     const queryClient = useQueryClient()
-    const { data: session } = useGetSession()
 
     return useMutation({
-        mutationFn: ({ postId, data }: { postId: string; data: UpdateAdminPostRequest }) => {
-            return updateAdminPost(postId, {
-                ...data,
-                userId: session?.user?.id,
-            })
-        },
+        mutationFn: ({ postId, data }: { postId: string; data: UpdateAdminPostRequest }) => updateAdminPost(postId, data),
         onSuccess: (_, { postId }) => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY.POSTS.LIST] })
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY.POSTS.DETAIL, postId] })
@@ -56,14 +44,9 @@ export const useUpdateAdminPost = () => {
 
 export const useDeleteAdminPost = () => {
     const queryClient = useQueryClient()
-    const { data: session } = useGetSession()
 
     return useMutation({
-        mutationFn: (postId: string) => {
-            return deleteAdminPost(postId, {
-                userId: session?.user?.id,
-            })
-        },
+        mutationFn: (postId: string) => deleteAdminPost(postId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEY.POSTS.LIST] })
         },

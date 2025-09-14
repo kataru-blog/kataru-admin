@@ -1,9 +1,10 @@
 import { useGetSession } from '@/entities/user'
 import { Editor } from '@/features/editor'
+import { Toaster } from '@/shared/ui/sonner'
 import dayjs from 'dayjs'
 import { useCreateAdminPost, useGetAdminPostById, useUpdateAdminPost } from 'entities/posts'
+import { useGetImagesByPostId } from 'entities/cf-images'
 import { UserCard } from 'features'
-import hljs from 'highlight.js/lib/core'
 import { Calendar, Eye, Heart, X } from 'lucide-react'
 import { useEffect, useState, type ComponentProps, type KeyboardEvent } from 'react'
 import { useDebounce } from 'shared/hooks/use-debounce'
@@ -33,6 +34,19 @@ export const PostEditor = ({ id }: { id?: string }) => {
     const [tagInput, setTagInput] = useState('')
     const [__html, setHtml] = useState('')
     const debouncedContent = useDebounce(content, 100)
+    const { data: imagesData } = useGetImagesByPostId(id || 'temp')
+    const uploadedImages = imagesData?.data || []
+
+    const copyImageMarkdownText = (imageUrl: string, imageName?: string) => {
+        const name = imageName || imageUrl.split('/').pop() || 'image'
+        navigator.clipboard.writeText(`![${name}](${imageUrl})`)
+        toast.success('이미지 링크가 복사되었습니다')
+    }
+
+    const handleThumbnailSelect = (imageUrl: string) => {
+        setThumbnailUrl(imageUrl)
+        toast.success('썸네일이 설정되었습니다')
+    }
 
     const handleTagInput = (e: KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && tagInput.trim()) {
@@ -130,7 +144,7 @@ export const PostEditor = ({ id }: { id?: string }) => {
                         onChange={(e) => setTitle(e.target.value)}
                     />
                 </div>
-                <Editor content={content} setContent={setContent} />
+                <Editor content={content} setContent={setContent} postId={id || 'temp'} />
 
                 <div className='grid gap-2 border-t p-3.5'>
                     <Label htmlFor='tags'>Tags</Label>
@@ -151,14 +165,34 @@ export const PostEditor = ({ id }: { id?: string }) => {
                             ))}
                         </div>
                     )}
-                    <div className='grid gap-2'>
-                        <Label htmlFor='thumbnail'>Thumbnail URL</Label>
-                        <Input
-                            id='thumbnail'
-                            placeholder='https://example.com/image.jpg'
-                            value={thumbnailUrl}
-                            onChange={(e) => setThumbnailUrl(e.target.value)}
-                        />
+                    <div className='flex flex-col gap-2'>
+                        <section className='flex items-baseline gap-2'>
+                            <Label htmlFor='thumbnail'>Images</Label>
+                            <span className='text-xs'>이미지를 클릭하면 마크다운이 복사되고, 우클릭하면 썸네일로 설정됩니다.</span>
+                        </section>
+
+                        <section className='flex gap-2 items-center h-16 relative overflow-x-auto'>
+                            {uploadedImages.length > 0 ? (
+                                uploadedImages.map((image) => (
+                                    <div key={image.id} className='relative h-full flex-shrink-0'>
+                                        <img
+                                            src={image.thumbnailUrl || image.originalUrl}
+                                            alt={image.r2Key}
+                                            className={`h-full object-cover cursor-pointer ${
+                                                thumbnailUrl === image.originalUrl ? 'ring-2 ring-primary' : ''
+                                            }`}
+                                            onClick={() => copyImageMarkdownText(image.originalUrl, image.r2Key)}
+                                            onContextMenu={(e) => {
+                                                e.preventDefault()
+                                                handleThumbnailSelect(image.originalUrl)
+                                            }}
+                                        />
+                                    </div>
+                                ))
+                            ) : (
+                                <div className='text-xs text-muted-foreground'>업로드된 이미지가 없습니다</div>
+                            )}
+                        </section>
                     </div>
 
                     <div className='space-y-4'>
@@ -215,6 +249,7 @@ export const PostEditor = ({ id }: { id?: string }) => {
                     />
                 </div>
             </section>
+            <Toaster />
         </div>
     )
 }

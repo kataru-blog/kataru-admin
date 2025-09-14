@@ -1,4 +1,4 @@
-import { Bold, Code, Italic, Link, Redo, Strikethrough, Underline, Undo } from 'lucide-react'
+import { Bold, Code, Image, Italic, Link, Redo, Strikethrough, Underline, Undo } from 'lucide-react'
 import { useState, type FC } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 import { flushSync } from 'react-dom'
@@ -10,14 +10,16 @@ import { useHistory } from './hooks/use-history'
 import { useContentEditable } from './hooks/use-content-editable'
 import { useKeyboardHandler } from './hooks/use-keyboard-handler'
 import { useShortcuts } from './hooks/use-shortcuts'
+import { useImageUpload } from './hooks/use-image-upload'
 import { EditorButton } from './editor-button'
 
 interface EditorProps {
     content: string
     setContent: (content: string) => void
+    postId?: string
 }
 
-export const Editor: FC<EditorProps> = ({ content, setContent }) => {
+export const Editor: FC<EditorProps> = ({ content, setContent, postId }) => {
     const [styles, setStyles] = useState<MarkdownStyles>({
         isBold: false,
         isItalic: false,
@@ -118,6 +120,18 @@ export const Editor: FC<EditorProps> = ({ content, setContent }) => {
         isComposing,
     })
 
+    const { fileInputRef, handleFileSelect, handleImageButtonClick, isUploading } = useImageUpload({
+        editorRef,
+        onImageInsert: (text) => {
+            flushSync(() => {
+                setContent(text)
+                addToHistory(text, true)
+            })
+            updateCursorStyles()
+        },
+        postId,
+    })
+
     const handleCombinedKeyDown = (e: React.KeyboardEvent) => {
         handleShortcutKeyDown(e.nativeEvent)
 
@@ -139,7 +153,15 @@ export const Editor: FC<EditorProps> = ({ content, setContent }) => {
                 />
                 <EditorButton icon={Code} onClick={() => wrapSelection('```', '```', styles.isCode)} isActive={styles.isCode} />
                 <EditorButton icon={Link} onClick={handleLink} isActive={styles.isLink} />
+                <EditorButton icon={Image} onClick={handleImageButtonClick} disabled={isUploading} />
             </div>
+            <input
+                ref={fileInputRef}
+                type='file'
+                accept='image/*'
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+            />
             <article className='flex gap-2 justify-center mx-auto p-7 overflow-y-auto size-full'>
                 <div
                     ref={editorRef}
